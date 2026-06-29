@@ -1,0 +1,98 @@
+{
+  "info": {
+    "name": "Book API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://pacific-motivation-production.up.railway.app",
+      "type": "string"
+    },
+    {
+      "key": "uuid",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Add Book",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/book/add",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "book", "add"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"uuid\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"name\": \"The Great Gatsby\",\n  \"authorName\": \"F. Scott Fitzgerald\",\n  \"releaseDate\": \"1925-04-10\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Get All Books",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/books",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "books"]
+        }
+      }
+    },
+    {
+      "name": "Get Book By ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/book/{{uuid}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "book", "{{uuid}}"]
+        }
+      }
+    },
+    {
+      "name": "Update Book By ID",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/book/{{uuid}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "book", "{{uuid}}"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"The Great Gatsby (Updated)\",\n  \"authorName\": \"F. Scott Fitzgerald\",\n  \"releaseDate\": \"1925-04-10\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Delete Book By ID",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/book/{{uuid}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "book", "{{uuid}}"]
+        }
+      }
+    }
+  ]
+}
