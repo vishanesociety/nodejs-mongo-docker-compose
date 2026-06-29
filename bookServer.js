@@ -32,7 +32,7 @@ app.use((error, req, res, next) => {
 });
 
 
-const port = 8080;
+const port = process.env.PORT || 8080;
 
 app.listen(port, () => console.log('Book server started and listening on port ' + port));
 
