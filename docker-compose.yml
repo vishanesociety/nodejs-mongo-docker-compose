@@ -1,58 +1,59 @@
-version: '3.8'
+version: '3.8' # Docker Compose file format version
 
-services:
-  mongodb:
-    image: mongo:6.0.6
-    container_name: mymongo2
-    restart: unless-stopped
+services: # Define all containers (services) that make up the app
+
+  mongodb: # Name of the first service — our database
+    image: mongo:6.0.6 # Use the official MongoDB image, version 6.0.6 from Docker Hub
+    container_name: mymongo2 # Give the container a fixed, human-readable name
+    restart: unless-stopped # Auto-restart the container if it crashes, unless you manually stop it
     ports:
-      - "27017:27017"
+      - "27017:27017" # Map host port 27017 to container port 27017 (MongoDB's default port)
     volumes:
-      - mongo_data:/data/db
+      - mongo_data:/data/db # Persist MongoDB data in a named volume so data survives container restarts
     networks:
-      - app-network
-    healthcheck:
-      test: [ "CMD", "sh", "-c", "echo 'db.runCommand({ping:1}).ok' | mongosh --quiet" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s     
+      - app-network # Connect this container to the custom network so the app can reach it
+    healthcheck: # Docker will run this check to know if MongoDB is ready
+      test: [ "CMD", "sh", "-c", "echo 'db.runCommand({ping:1}).ok' | mongosh --quiet" ] # Ping MongoDB; exits 0 if healthy
+      interval: 10s # Run the health check every 10 seconds
+      timeout: 5s # If the check takes longer than 5s, treat it as failed
+      retries: 5 # Mark the container unhealthy only after 5 consecutive failures
+      start_period: 10s # Give MongoDB 10s to start up before counting failures
 
 
   # Node.js Application Service
-  app:
+  app: # Name of the second service — our Node.js backend
     build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: mynodejsmicroservice2
-    restart: unless-stopped
-    environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      PORT: ${APP_PORT:-8080}
-      DATABASE_URL: mongodb://mongodb:27017/BOOKS
+      context: . # Use the current directory as the build context
+      dockerfile: Dockerfile # Build the image using this Dockerfile
+    container_name: mynodejsmicroservice2 # Fixed name for the Node.js container
+    restart: unless-stopped # Auto-restart on crash
+    environment: # Environment variables injected into the container at runtime
+      NODE_ENV: ${NODE_ENV:-production} # Use $NODE_ENV from your shell, default to "production"
+      PORT: ${APP_PORT:-8080} # Port the Node.js app listens on, default 8080
+      DATABASE_URL: mongodb://mongodb:27017/BOOKS # Connection string — "mongodb" resolves to the mongodb container via the shared network
     ports:
-      - "${APP_PORT:-8080}:8080"
+      - "${APP_PORT:-8080}:8080" # Map host port (default 8080) to container port 8080
     depends_on:
       mongodb:
-        condition: service_healthy
+        condition: service_healthy # Don't start this container until MongoDB passes its health check
     networks:
-      - app-network
+      - app-network # Same network as MongoDB so they can communicate
     volumes:
-      - ./logs:/usr/src/app/logs
-    healthcheck:
-      test: ["CMD", "node", "healthcheck.js"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - ./logs:/usr/src/app/logs # Mount local ./logs folder into the container to persist log files
+    healthcheck: # Health check for the Node.js app
+      test: ["CMD", "node", "healthcheck.js"] # Run healthcheck.js to verify the app is responding
+      interval: 30s # Check every 30 seconds
+      timeout: 10s # Fail if it takes longer than 10 seconds
+      retries: 3 # Mark unhealthy after 3 consecutive failures
+      start_period: 40s # Give the app 40s to boot before counting failures
 
 # Named volumes for data persistence
 volumes:
-  mongo_data:
-    driver: local
-  
+  mongo_data: # Declare the named volume used by MongoDB
+    driver: local # Store the volume data on the local machine's disk
+
 
 # Custom network for service communication
 networks:
-  app-network:
-    driver: bridge
+  app-network: # Declare the custom network
+    driver: bridge # Bridge network — containers on it can talk to each other by service name
